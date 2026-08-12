@@ -1,29 +1,13 @@
 'use client';
+import { signIn } from 'next-auth/react';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
-  const [pw, setPw] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleLogin() {
     setLoading(true);
-    setError('');
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: pw }),
-    });
-    if (res.ok) {
-      router.push('/');
-      router.refresh();
-    } else {
-      setError('Senha incorreta');
-      setLoading(false);
-    }
+    await signIn('azure-ad', { callbackUrl: '/' });
   }
 
   return (
@@ -37,27 +21,26 @@ export default function LoginPage() {
           <p className="text-sm text-gray-500 mt-1">Agente de produto</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
-            <input
-              type="password"
-              value={pw}
-              onChange={e => setPw(e.target.value)}
-              placeholder="••••••••"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              autoFocus
-            />
-          </div>
-          {error && <p className="text-sm text-red-500">{error}</p>}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <button
-            type="submit"
+            onClick={handleLogin}
             disabled={loading}
-            className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 py-2.5 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
-            {loading ? 'Entrando...' : 'Entrar'}
+            {/* Microsoft logo */}
+            <svg width="20" height="20" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+              <rect x="1" y="1" width="9" height="9" fill="#f25022" />
+              <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
+              <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
+              <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
+            </svg>
+            {loading ? 'Redirecionando...' : 'Entrar com conta Microsoft'}
           </button>
-        </form>
+        </div>
+
+        <p className="text-xs text-gray-400 text-center mt-4">
+          Acesso restrito ao time UserX
+        </p>
       </div>
     </div>
   );
